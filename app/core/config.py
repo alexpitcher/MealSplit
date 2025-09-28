@@ -16,7 +16,12 @@ class Settings(BaseSettings):
     DEBUG: bool = True
 
     # CORS
-    BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8080"]
+    BACKEND_CORS_ORIGINS: List[str] = [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:8080",
+        "http://localhost:5173",
+    ]
     ALLOWED_HOSTS: List[str] = ["localhost", "127.0.0.1"]
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
@@ -36,6 +41,9 @@ class Settings(BaseSettings):
 
     # External APIs
     OPENAI_API_KEY: Optional[str] = None
+    GEMINI_API_KEY: Optional[str] = None
+    GEMINI_EMBEDDING_MODEL: str = "text-embedding-004"
+    GEMINI_TEXT_MODEL: str = "gemini-1.5-flash"
     SPLITWISE_CLIENT_ID: Optional[str] = None
     SPLITWISE_CLIENT_SECRET: Optional[str] = None
     SPLITWISE_REDIRECT_URI: str = "http://localhost:8000/api/v1/splitwise/oauth/callback"

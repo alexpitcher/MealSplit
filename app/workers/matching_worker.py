@@ -164,13 +164,14 @@ class MatchingWorker:
         total_lines: int
     ):
         """Publish matching completion results."""
+        from datetime import datetime, timezone
         message = {
             "receipt_id": receipt_id,
             "planning_week_id": planning_week_id,
             "matched_count": matched_count,
             "total_lines": total_lines,
             "completion_rate": matched_count / total_lines if total_lines > 0 else 0,
-            "timestamp": "now"  # Would use actual timestamp
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
 
         channel = f"receipt:{receipt_id}:matching"

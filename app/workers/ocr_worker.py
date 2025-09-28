@@ -1,11 +1,15 @@
 import logging
+import os
+import json
 from typing import Dict, Any
+from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 
 from app.core.database import SessionLocal
 from app.core.redis_client import redis_client
 from app.models.receipt import Receipt, ReceiptLine
 from app.services.ocr_service import OCRService
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -41,8 +45,16 @@ class OCRWorker:
             receipt.purchased_at = ocr_result.get("purchase_date", receipt.purchased_at)
             receipt.currency = ocr_result.get("currency", receipt.currency)
 
-            # Save OCR JSON reference (would typically be a file path or S3 URL)
-            receipt.ocr_json_ref = f"ocr_results/{receipt_id}.json"
+            # Persist OCR JSON alongside uploads and store its path
+            ocr_dir = os.path.join(settings.UPLOAD_DIR, "ocr_results")
+            os.makedirs(ocr_dir, exist_ok=True)
+            ocr_path = os.path.join(ocr_dir, f"{receipt_id}.json")
+            try:
+                with open(ocr_path, "w") as jf:
+                    json.dump(ocr_result, jf)
+                receipt.ocr_json_ref = ocr_path
+            except Exception as e:
+                logger.warning(f"Failed to persist OCR JSON for receipt {receipt_id}: {e}")
 
             # Create receipt lines from OCR results
             for item in ocr_result.get("items", []):
@@ -92,7 +104,7 @@ class OCRWorker:
         message = {
             "receipt_id": receipt_id,
             "status": status,
-            "timestamp": "now",  # Would use actual timestamp
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "data": data or {}
         }
 

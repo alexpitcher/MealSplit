@@ -39,17 +39,12 @@ MealSplit helps households split grocery costs fairly by:
 
 2. **Start services with Docker**:
    ```bash
-   docker-compose up -d
+   docker compose up -d postgres redis migrate app web
    ```
 
-3. **Run database migrations**:
-   ```bash
-   docker-compose --profile tools run migrate
-   ```
-
-4. **Access the API**:
-   - API: http://localhost:8000
-   - API Docs: http://localhost:8000/docs
+3. **Access services**:
+   - API: http://localhost:8000 (docs at /docs)
+   - Frontend: http://localhost:5173
    - PostgreSQL: localhost:5432
    - Redis: localhost:6379
 
@@ -85,7 +80,8 @@ MealSplit helps households split grocery costs fairly by:
 ├── alembic/             # Database migrations
 ├── tests/               # Test files
 ├── docker-compose.yml   # Development environment
-├── Dockerfile          # Container configuration
+├── Dockerfile           # Container configuration
+├── MealSplit Web App/   # Vite + React frontend
 └── requirements.txt    # Python dependencies
 ```
 

@@ -3,7 +3,7 @@ from typing import List, Dict, Any, Optional, Tuple
 from sqlalchemy.orm import Session
 from difflib import SequenceMatcher
 
-from app.models.planning import RecipeIngredient, PlanningWeek
+from app.models.planning import RecipeIngredient, PlanningWeek, WeekRecipe
 from app.models.receipt import ReceiptLine, LineMatch
 
 logger = logging.getLogger(__name__)
@@ -91,16 +91,13 @@ class MatchingService:
         return None
 
     def _get_week_ingredients(self, db: Session, planning_week_id: int) -> List[RecipeIngredient]:
-        """Get all recipe ingredients for a planning week."""
-        return db.query(RecipeIngredient).join(
-            RecipeIngredient.recipe
-        ).join(
-            RecipeIngredient.recipe.has(
-                Recipe.week_recipes.any(
-                    WeekRecipe.planning_week_id == planning_week_id
-                )
-            )
-        ).all()
+        """Get all recipe ingredients for a planning week via WeekRecipe join."""
+        return (
+            db.query(RecipeIngredient)
+            .join(WeekRecipe, WeekRecipe.recipe_id == RecipeIngredient.recipe_id)
+            .filter(WeekRecipe.planning_week_id == planning_week_id)
+            .all()
+        )
 
     def _normalize_name(self, name: str) -> str:
         """Normalize ingredient/item names for matching."""

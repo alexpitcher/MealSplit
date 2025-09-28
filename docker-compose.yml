@@ -43,6 +43,10 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - ENVIRONMENT=development
       - DEBUG=true
+      - BACKEND_CORS_ORIGINS=http://localhost:5173,http://localhost:3000
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_EMBEDDING_MODEL=${GEMINI_EMBEDDING_MODEL:-text-embedding-004}
+      - GEMINI_TEXT_MODEL=${GEMINI_TEXT_MODEL:-gemini-1.5-flash}
     volumes:
       - .:/app
       - uploads:/tmp/uploads
@@ -51,6 +55,22 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    restart: unless-stopped
+
+  # Vite React Frontend (MealSplit Web App)
+  web:
+    image: node:18-alpine
+    working_dir: /web
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./MealSplit Web App:/web
+    depends_on:
+      app:
+        condition: service_started
     restart: unless-stopped
 
   # Alembic migrations (run once)
